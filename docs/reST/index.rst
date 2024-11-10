@@ -1,213 +1,122 @@
-Pygame Front Page
-=================
+Himport pygame
+import time
+import random
+
+# Inicializa pygame
+pygame.init()
+
+# Colores
+blanco = (255, 255, 255)
+negro = (0, 0, 0)
+rojo = (213, 50, 80)
+verde = (0, 255, 0)
+azul = (50, 153, 213)
+
+# Tamaño de la pantalla
+ancho = 600
+alto = 400
+
+pantalla = pygame.display.set_mode((ancho, alto))
+pygame.display.set_caption('Snake')
+
+reloj = pygame.time.Clock()
+tamaño_serpiente = 10
+velocidad_serpiente = 15
+
+# Fuentes
+fuente = pygame.font.SysFont("bahnschrift", 25)
+
+def muestra_puntaje(puntaje):
+    valor = fuente.render("Puntaje: " + str(puntaje), True, azul)
+    pantalla.blit(valor, [0, 0])
+
+def nuestra_serpiente(tamaño_serpiente, lista_serpiente):
+    for x in lista_serpiente:
+        pygame.draw.rect(pantalla, negro, [x[0], x[1], tamaño_serpiente, tamaño_serpiente])
+
+def mensaje(msg, color):
+    mensaje = fuente.render(msg, True, color)
+    pantalla.blit(mensaje, [ancho / 6, alto / 3])
+
+def juego():
+    game_over = False
+    game_close = False
+
+    x1 = ancho / 2
+    y1 = alto / 2
+
+    x1_cambio = 0
+    y1_cambio = 0
+
+    lista_serpiente = []
+    longitud_serpiente = 1
+
+    comida_x = round(random.randrange(0, ancho - tamaño_serpiente) / 10.0) * 10.0
+    comida_y = round(random.randrange(0, alto - tamaño_serpiente) / 10.0) * 10.0
+
+    while not game_over:
+
+        while game_close == True:
+            pantalla.fill(blanco)
+            mensaje("Perdiste! Presiona C para Jugar de Nuevo o Q para Salir", rojo)
+            muestra_puntaje(longitud_serpiente - 1)
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        juego()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    x1_cambio = -tamaño_serpiente
+                    y1_cambio = 0
+                elif event.key == pygame.K_RIGHT:
+                    x1_cambio = tamaño_serpiente
+                    y1_cambio = 0
+                elif event.key == pygame.K_UP:
+                    y1_cambio = -tamaño_serpiente
+                    x1_cambio = 0
+                elif event.key == pygame.K_DOWN:
+                    y1_cambio = tamaño_serpiente
+                    x1_cambio = 0
+
+        if x1 >= ancho or x1 < 0 or y1 >= alto or y1 < 0:
+            game_close = True
+        x1 += x1_cambio
+        y1 += y1_cambio
+        pantalla.fill(blanco)
+        pygame.draw.rect(pantalla, verde, [comida_x, comida_y, tamaño_serpiente, tamaño_serpiente])
+        cabeza_serpiente = []
+        cabeza_serpiente.append(x1)
+        cabeza_serpiente.append(y1)
+        lista_serpiente.append(cabeza_serpiente)
+        if len(lista_serpiente) > longitud_serpiente:
+            del lista_serpiente[0]
 
-.. toctree::
-   :maxdepth: 2
-   :glob:
-   :hidden:
+        for x in lista_serpiente[:-1]:
+            if x == cabeza_serpiente:
+                game_close = True
 
-   ref/*
-   tut/*
-   tut/en/**/*
-   tut/ko/**/*
-   c_api
-   filepaths
-   logos
+        nuestra_serpiente(tamaño_serpiente, lista_serpiente)
+        muestra_puntaje(longitud_serpiente - 1)
 
-Quick start
------------
+        pygame.display.update()
 
-Welcome to pygame! Once you've got pygame installed (:code:`pip install pygame` or
-:code:`pip3 install pygame` for most people), the next question is how to get a game
-loop running. Pygame, unlike some other libraries, gives you full control of program
-execution. That freedom means it is easy to mess up in your initial steps.
+        if x1 == comida_x and y1 == comida_y:
+            comida_x = round(random.randrange(0, ancho - tamaño_serpiente) / 10.0) * 10.0
+            comida_y = round(random.randrange(0, alto - tamaño_serpiente) / 10.0) * 10.0
+            longitud_serpiente += 1
 
-Here is a good example of a basic setup (opens the window, updates the screen, and handles events)--
+        reloj.tick(velocidad_serpiente)
 
-.. literalinclude:: ref/code_examples/base_script.py
+    pygame.quit()
+    quit()
 
-Here is a slightly more fleshed out example, which shows you how to move something
-(a circle in this case) around on screen--
-
-.. literalinclude:: ref/code_examples/base_script_example.py
-
-For more in depth reference, check out the :ref:`tutorials-reference-label`
-section below, check out a video tutorial (`I'm a fan of this one
-<https://www.youtube.com/watch?v=AY9MnQ4x3zk>`_), or reference the API
-documentation by module.
-
-Documents
----------
-
-`Readme`_
-  Basic information about pygame: what it is, who is involved, and where to find it.
-
-`Install`_
-  Steps needed to compile pygame on several platforms.
-  Also help on finding and installing prebuilt binaries for your system.
-
-:doc:`filepaths`
-  How pygame handles file system paths.
-
-:doc:`Pygame Logos <logos>`
-   The logos of Pygame in different resolutions.
-
-
-`LGPL License`_
-  This is the license pygame is distributed under.
-  It provides for pygame to be distributed with open source and commercial software.
-  Generally, if pygame is not changed, it can be used with any type of program.
-
-.. _tutorials-reference-label:
-
-Tutorials
----------
-
-:doc:`Introduction to Pygame <tut/PygameIntro>`
-  An introduction to the basics of pygame.
-  This is written for users of Python and appeared in volume two of the Py magazine.
-
-:doc:`Import and Initialize <tut/ImportInit>`
-  The beginning steps on importing and initializing pygame.
-  The pygame package is made of several modules.
-  Some modules are not included on all platforms.
-
-:doc:`How do I move an Image? <tut/MoveIt>`
-  A basic tutorial that covers the concepts behind 2D computer animation.
-  Information about drawing and clearing objects to make them appear animated.
-
-:doc:`Chimp Tutorial, Line by Line <tut/ChimpLineByLine>`
-  The pygame examples include a simple program with an interactive fist and a chimpanzee.
-  This was inspired by the annoying flash banner of the early 2000s.
-  This tutorial examines every line of code used in the example.
-
-:doc:`Sprite Module Introduction <tut/SpriteIntro>`
-  Pygame includes a higher level sprite module to help organize games.
-  The sprite module includes several classes that help manage details found in almost all games types.
-  The Sprite classes are a bit more advanced than the regular pygame modules,
-  and need more understanding to be properly used.
-
-:doc:`Surfarray Introduction <tut/SurfarrayIntro>`
-  Pygame used the NumPy python module to allow efficient per pixel effects on images.
-  Using the surface arrays is an advanced feature that allows custom effects and filters.
-  This also examines some of the simple effects from the pygame example, arraydemo.py.
-
-:doc:`Camera Module Introduction <tut/CameraIntro>`
-  Pygame, as of 1.9, has a camera module that allows you to capture images,
-  watch live streams, and do some basic computer vision.
-  This tutorial covers those use cases.
-
-:doc:`Newbie Guide <tut/newbieguide>`
-  A list of thirteen helpful tips for people to get comfortable using pygame.
-
-:doc:`Making Games Tutorial <tut/MakeGames>`
-  A large tutorial that covers the bigger topics needed to create an entire game.
-
-:doc:`Display Modes <tut/DisplayModes>`
-  Getting a display surface for the screen.
-
-:doc:`한국어 튜토리얼 (Korean Tutorial) <tut/ko/빨간블록 검은블록/개요>`
-  빨간블록 검은블록
-
-
-Reference
----------
-
-:ref:`genindex`
-  A list of all functions, classes, and methods in the pygame package.
-
-:doc:`ref/bufferproxy`
-  An array protocol view of surface pixels
-
-:doc:`ref/color`
-  Color representation.
-
-:doc:`ref/cursors`
-  Loading and compiling cursor images.
-
-:doc:`ref/display`
-  Configure the display surface.
-
-:doc:`ref/draw`
-  Drawing simple shapes like lines and ellipses to surfaces.
-
-:doc:`ref/event`
-  Manage the incoming events from various input devices and the windowing platform.
-
-:doc:`ref/examples`
-  Various programs demonstrating the use of individual pygame modules.
-
-:doc:`ref/font`
-  Loading and rendering TrueType fonts.
-
-:doc:`ref/freetype`
-  Enhanced pygame module for loading and rendering font faces.
-
-:doc:`ref/gfxdraw`
-  Anti-aliasing draw functions.
-
-:doc:`ref/image`
-  Loading, saving, and transferring of surfaces.
-
-:doc:`ref/joystick`
-  Manage the joystick devices.
-
-:doc:`ref/key`
-  Manage the keyboard device.
-
-:doc:`ref/locals`
-  Pygame constants.
-
-:doc:`ref/mixer`
-  Load and play sounds
-
-:doc:`ref/mouse`
-  Manage the mouse device and display.
-
-:doc:`ref/music`
-  Play streaming music tracks.
-
-:doc:`ref/pygame`
-  Top level functions to manage pygame.
-
-:doc:`ref/pixelarray`
-  Manipulate image pixel data.
-
-:doc:`ref/rect`
-  Flexible container for a rectangle.
-
-:doc:`ref/scrap`
-  Native clipboard access.
-
-:doc:`ref/sndarray`
-  Manipulate sound sample data.
-
-:doc:`ref/sprite`
-  Higher level objects to represent game images.
-
-:doc:`ref/surface`
-  Objects for images and the screen.
-
-:doc:`ref/surfarray`
-  Manipulate image pixel data.
-
-:doc:`ref/tests`
-  Test pygame.
-
-:doc:`ref/time`
-  Manage timing and framerate.
-
-:doc:`ref/transform`
-  Resize and move images.
-
-:doc:`pygame C API <c_api>`
-  The C api shared amongst pygame extension modules.
-
-:ref:`search`
-  Search pygame documents by keyword.
-
-.. _Readme: ../wiki/about
-
-.. _Install: ../wiki/GettingStarted#Pygame%20Installation
-
-.. _LGPL License: LGPL.txt
+juego()
